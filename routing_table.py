@@ -91,12 +91,13 @@ class RoutingTable:
         }
 
     def replace_with(self, remote_rt):
-        self.version = remote_rt["version"]
-        self.uid = remote_rt["uid"]
         self.node_map.clear()
         self.virtual_nodes.clear()
         for n in remote_rt.get("nodes", []):
             self.add_node(n["host"], n["port"])
+
+        self.version = remote_rt["version"]
+        self.uid = remote_rt["uid"]
 
     def merge_with(self, remote_rt):
         seen = set(self.node_map.keys())
@@ -104,11 +105,10 @@ class RoutingTable:
         for n in remote_rt.get("nodes", []):
             node_id = f"{n['host']}:{n['port']}"
             if node_id not in seen:
-                print("*******************")
                 changed = True
                 self.add_node(n["host"], n["port"])
                 seen.add(node_id)
-
+    
     def debug_print(self):
         print(f"RoutingTable (version {self.version}, uid {self.uid}):")
         for v in self.virtual_nodes:
