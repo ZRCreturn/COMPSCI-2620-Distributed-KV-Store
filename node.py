@@ -4,10 +4,11 @@ import uvicorn
 import sys
 import requests
 import random
+import logging
 
 from routing_table import RoutingTable
 from gossip import GossipManager
-
+from data_migrator import DataMigrator
 from config import BOOTSTRAP_NODE
 
 app = FastAPI()
@@ -29,7 +30,10 @@ class Node:
 
         self.routing_table = RoutingTable(self_host=self.host, self_port=self.port)
         self.gossip = GossipManager(self_node_id=self.node_id, routing_table=self.routing_table)
+        self.migrator = DataMigrator(self)
+
         self.gossip.start()
+        self.migrator.start()
 
     def is_responsible(self, key):
         node = self.routing_table.get_responsible_node(key)
@@ -85,6 +89,12 @@ class Node:
             print(f"[Join] Failed to join via bootstrap {bootstrap_url}: {e}")
 
 node = None
+
+class ExcludeGossipFilter(logging.Filter):
+    def filter(self, record):
+        return '/gossip' not in record.getMessage()   
+access_log = logging.getLogger("uvicorn.access")
+access_log.addFilter(ExcludeGossipFilter())
 
 @app.put("/kv")
 async def put_kv(req: PutRequest, routing_version: str = Header(None)):
