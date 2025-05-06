@@ -86,6 +86,9 @@ python client.py
 * Fork the repository and open a pull request
 * Follow PEP8 style and include tests for new features
 
+## Poster
+* here is link to our poster https://drive.google.com/file/d/1D7CFvo0xePPXTV_7kPAasn-DAQeH_vfW/view?usp=sharing
+
 ## License
 
 MIT License
