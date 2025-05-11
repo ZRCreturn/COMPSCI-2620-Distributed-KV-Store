@@ -32,7 +32,7 @@ All tunable parameters live in `config.py`:
 * **BOOTSTRAP\_NODE**: seed address for initial join (e.g. "127.0.0.1:8000")
 * **VIRTUAL\_NODE\_REPLICAS**: number of virtual nodes per physical node
 * **GOSSIP\_FANOUT**, **GOSSIP\_INTERVAL**, **HEARTBEAT\_INTERVAL**: gossip settings
-* **FAILURE\_TIMEOUT**, **FAILURE\_HARD\_DEAD**: failure detection timing
+* **FAILURE\_TIMEOUT**, **FAILURE\_HARD\_DEAD**, **FAILURE\_DETECT\_INTERVAL**: failure detection timing
 
 ## Running the Cluster
 

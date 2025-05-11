@@ -6,6 +6,7 @@ import requests
 import random
 import logging
 
+from utils import get_host_port
 from routing_table import RoutingTable
 from gossip import GossipManager
 from data_migrator import DataMigrator
@@ -136,7 +137,7 @@ if __name__ == "__main__":
     host = sys.argv[1]
     port = int(sys.argv[2])
     node = Node(host=host, port=port)
-    default_bootstrap_host, default_bootstrap_port = BOOTSTRAP_NODE.split(":")
+    default_bootstrap_host, default_bootstrap_port = get_host_port(BOOTSTRAP_NODE)
     node.bootstrap_join(default_bootstrap_host, default_bootstrap_port)
 
     uvicorn.run(app, host=host, port=port)

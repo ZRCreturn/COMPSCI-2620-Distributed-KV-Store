@@ -11,6 +11,7 @@
   * `gossip.py`: peer-to-peer membership
   * `data_migrator.py`: background rebalancer
   * `config.py`: tunable parameters
+  * `utils.py`: helper functions
 
 ## 2. Design Decisions
 

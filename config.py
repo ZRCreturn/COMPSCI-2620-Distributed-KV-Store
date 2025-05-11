@@ -13,6 +13,7 @@ HEARTBEAT_INTERVAL = 1             # Heartbeat increases every second
 GOSSIP_INTERVAL = 2                # Send gossip every T seconds
 FAILURE_TIMEOUT = 10               # Time after which a node is suspected if no response
 FAILURE_HARD_DEAD = 15             # Time after which a node is declared dead
+FAILURE_DETECT_INTERVAL = 3        # Time between failure detection rounds
 
 # ===================
 # Consistent Hashing

@@ -2,14 +2,13 @@ import requests
 import random
 import sys
 from config import BOOTSTRAP_NODE
-from routing_table import RoutingTable, hash_str
-
+from routing_table import RoutingTable
+from utils import hash_str, get_host_port
 class SmartClient:
     def __init__(self):
         self.routing_table = None
         self.version = -1
-        self.bootstrap_host, self.bootstrap_port = BOOTSTRAP_NODE.split(":")
-        self.bootstrap_port = int(self.bootstrap_port)
+        self.bootstrap_host, self.bootstrap_port = get_host_port(BOOTSTRAP_NODE)
         self.bootstrap_join()
 
     def bootstrap_join(self):

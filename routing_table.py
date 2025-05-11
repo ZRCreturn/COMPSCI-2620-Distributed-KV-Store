@@ -1,19 +1,14 @@
-import hashlib
 from bisect import bisect_right
 import uuid
 from config import VIRTUAL_NODE_REPLICAS
-
-def hash_str(s):
-    return int(hashlib.sha256(s.encode("utf-8")).hexdigest(), 16) % (2 ** 64)
-
-
+from utils import hash_str
 class NodeMeta:
-    def __init__(self, host, port):
+    def __init__(self, host: str, port: int) -> None:
         self.host = host
         self.port = port
         self.node_id = f"{host}:{port}"
 
-    def to_dict(self):
+    def to_dict(self) -> dict:
         return {
             "node_id": self.node_id,
             "host": self.host,
@@ -22,12 +17,12 @@ class NodeMeta:
 
 
 class VirtualNode:
-    def __init__(self, vnode_id, physical_node_id):
+    def __init__(self, vnode_id: str, physical_node_id: str) -> None:
         self.vnode_id = vnode_id
         self.physical_node_id = physical_node_id
         self.hash = hash_str(vnode_id)
 
-    def to_dict(self):
+    def to_dict(self) -> dict:
         return {
             "vnode_id": self.vnode_id,
             "hash": self.hash,
@@ -36,7 +31,10 @@ class VirtualNode:
 
 
 class RoutingTable:
-    def __init__(self, self_host, self_port):
+    """
+    A routing table for a node in the network.
+    """
+    def __init__(self, self_host: str, self_port: int) -> None:
         self.version = 1
         self.uid = str(uuid.uuid4())
         self.replica_factor = VIRTUAL_NODE_REPLICAS
@@ -44,7 +42,7 @@ class RoutingTable:
         self.node_map = {}  # physical_node_id -> NodeMeta
         self.add_node(self_host, self_port)
 
-    def _sorted_insert(self, vnode):
+    def _sorted_insert(self, vnode: VirtualNode) -> None:
         """
         Inserts vnode into the virtual_nodes list, sorted by hash
         This is used to maintain the hash ring
@@ -52,7 +50,7 @@ class RoutingTable:
         idx = bisect_right([n.hash for n in self.virtual_nodes], vnode.hash)
         self.virtual_nodes.insert(idx, vnode)
 
-    def add_node(self, host, port):
+    def add_node(self, host: str, port: int) -> None:
         """
         Adds a new node to the routing table by adding it to the node_map
         and adding its virtual nodes to the virtual_nodes list.
@@ -71,7 +69,7 @@ class RoutingTable:
         self.version += 1
         self.uid = str(uuid.uuid4())
 
-    def remove_node(self, host, port):
+    def remove_node(self, host: str, port: int) -> None:
         """
         Removes a node from the routing table by removing it from the node_map
         and removing its virtual nodes from the virtual_nodes list.
@@ -86,7 +84,7 @@ class RoutingTable:
         self.version += 1
         self.uid = str(uuid.uuid4())
 
-    def get_responsible_node(self, key):
+    def get_responsible_node(self, key: str) -> NodeMeta:
         """
         Given a key, finds the responsible node by finding the virtual node with a hash
         that is closest to the key's hash, and then returns the physical node associated
@@ -100,7 +98,7 @@ class RoutingTable:
         physical_id = vnode.physical_node_id
         return self.node_map[physical_id]
 
-    def serialize(self):
+    def serialize(self) -> dict:
         """
         Serializes the routing table into a dictionary.
         """
@@ -110,7 +108,7 @@ class RoutingTable:
             "nodes": [node.to_dict() for node in self.node_map.values()]
         }
 
-    def replace_with(self, remote_rt):
+    def replace_with(self, remote_rt: dict) -> None:
         """
         Replaces the current routing table with a new one by clearing the current
         routing table and adding the nodes from the new routing table.
@@ -123,7 +121,7 @@ class RoutingTable:
         self.version = remote_rt["version"]
         self.uid = remote_rt["uid"]
 
-    def merge_with(self, remote_rt):
+    def merge_with(self, remote_rt: dict) -> None:
         """
         Merges the current routing table with a new one by adding the nodes from the new
         routing table that are not already in the current routing table.
@@ -135,7 +133,7 @@ class RoutingTable:
                 self.add_node(n["host"], n["port"])
                 seen.add(node_id)
     
-    def debug_print(self):
+    def debug_print(self) -> None:
         """
         Prints the current routing table in a human-readable format.
         """

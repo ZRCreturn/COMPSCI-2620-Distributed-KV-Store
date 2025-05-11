@@ -1,5 +1,5 @@
 import unittest
-from routing_table import RoutingTable, NodeMeta, VirtualNode, hash_str
+from routing_table import RoutingTable
 from config import VIRTUAL_NODE_REPLICAS
 
 class TestRoutingTable(unittest.TestCase):
