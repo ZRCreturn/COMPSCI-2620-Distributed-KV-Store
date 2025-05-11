@@ -40,15 +40,23 @@ class RoutingTable:
         self.version = 1
         self.uid = str(uuid.uuid4())
         self.replica_factor = VIRTUAL_NODE_REPLICAS
-        self.virtual_nodes = []
-        self.node_map = {}
+        self.virtual_nodes = [] # VirtualNode sorted in hash
+        self.node_map = {}  # physical_node_id -> NodeMeta
         self.add_node(self_host, self_port)
 
     def _sorted_insert(self, vnode):
+        """
+        Inserts vnode into the virtual_nodes list, sorted by hash
+        This is used to maintain the hash ring
+        """
         idx = bisect_right([n.hash for n in self.virtual_nodes], vnode.hash)
         self.virtual_nodes.insert(idx, vnode)
 
     def add_node(self, host, port):
+        """
+        Adds a new node to the routing table by adding it to the node_map
+        and adding its virtual nodes to the virtual_nodes list.
+        """
         node = NodeMeta(host, port)
         node_id = node.node_id
         if node_id in self.node_map:
@@ -64,6 +72,10 @@ class RoutingTable:
         self.uid = str(uuid.uuid4())
 
     def remove_node(self, host, port):
+        """
+        Removes a node from the routing table by removing it from the node_map
+        and removing its virtual nodes from the virtual_nodes list.
+        """
         node_id = f"{host}:{port}"
         if node_id not in self.node_map:
             return
@@ -75,6 +87,11 @@ class RoutingTable:
         self.uid = str(uuid.uuid4())
 
     def get_responsible_node(self, key):
+        """
+        Given a key, finds the responsible node by finding the virtual node with a hash
+        that is closest to the key's hash, and then returns the physical node associated
+        with the virtual node.
+        """
         key_hash = hash_str(key)
         idx = bisect_right([v.hash for v in self.virtual_nodes], key_hash)
         if idx == len(self.virtual_nodes):
@@ -84,6 +101,9 @@ class RoutingTable:
         return self.node_map[physical_id]
 
     def serialize(self):
+        """
+        Serializes the routing table into a dictionary.
+        """
         return {
             "version": self.version,
             "uid": self.uid,
@@ -91,6 +111,10 @@ class RoutingTable:
         }
 
     def replace_with(self, remote_rt):
+        """
+        Replaces the current routing table with a new one by clearing the current
+        routing table and adding the nodes from the new routing table.
+        """
         self.node_map.clear()
         self.virtual_nodes.clear()
         for n in remote_rt.get("nodes", []):
@@ -100,16 +124,21 @@ class RoutingTable:
         self.uid = remote_rt["uid"]
 
     def merge_with(self, remote_rt):
+        """
+        Merges the current routing table with a new one by adding the nodes from the new
+        routing table that are not already in the current routing table.
+        """
         seen = set(self.node_map.keys())
-        changed = False
         for n in remote_rt.get("nodes", []):
             node_id = f"{n['host']}:{n['port']}"
             if node_id not in seen:
-                changed = True
                 self.add_node(n["host"], n["port"])
                 seen.add(node_id)
     
     def debug_print(self):
+        """
+        Prints the current routing table in a human-readable format.
+        """
         print(f"RoutingTable (version {self.version}, uid {self.uid}):")
         for v in self.virtual_nodes:
             print(f" - {v.vnode_id} (hash={v.hash}) -> {v.physical_node_id}")
